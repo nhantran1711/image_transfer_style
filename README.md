@@ -14,8 +14,8 @@ A pretrained VGG19 convolutional network is used purely as a fixed feature extra
 
 [nst/model.py](nst/model.py) wraps `torchvision.models.vgg19(pretrained=True).features` and taps it at fixed layers:
 
-- **Content representation** — layer `21` (`conv4_2`). Deep enough to capture object structure and layout while discarding exact pixel values.
-- **Style representation** — layers `0, 5, 10, 19, 28` (`conv1_1, conv2_1, conv3_1, conv4_1, conv5_1`). Multiple layers, from shallow to deep, capture texture at multiple scales (fine brushstrokes to large color regions).
+- **Content representation**: layer `21` (`conv4_2`). Deep enough to capture object structure and layout while discarding exact pixel values.
+- **Style representation**: layers `0, 5, 10, 19, 28` (`conv1_1, conv2_1, conv3_1, conv4_1, conv5_1`). Multiple layers, from shallow to deep, capture texture at multiple scales (fine brushstrokes to large color regions).
 
 ### 2. Content loss
 
