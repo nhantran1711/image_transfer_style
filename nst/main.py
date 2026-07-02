@@ -7,6 +7,14 @@ from model import VGGFeatures
 from utils import load_image 
 from losses import ContentLoss, StyleLoss
 
+
+# VARIABLES
+STYLE_WEIGHT = 1e6
+CONTENT_WEIGHT = 1
+
+running = [0]
+
+
 # Define the main function for neural style transfer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -29,5 +37,35 @@ style_loss = [StyleLoss(style_feature[i]) for i in range(len(style_feature))]
 generated_image = content_image.clone().requires_grad_(True)
 
 # Define the optimizer for the generated image using Adam optimizer with a learning rate of 0.01
-optimizer = optim.Adam([generated_image], lr=0.01)
+optimizer = optim.Adam([generated_image], lr = 0.01)
+
+
+# Main loop 
+while running[0] <= 300:
+
+    def closure():
+        optimizer.zero_grad()  # Clear the gradients of the optimizer
+    
+        content_feat, style_feat = model(generated_image)  # Pass the generated image through the model
+
+        content_loss_value = content_loss(content_feat)  # Calculate the content loss
+
+        # Calculate the style loss 
+        style_loss_value = 0 
+
+        for i in range(len(style_feat)):
+            style_loss_value += style_loss[i](style_feat[i])  # Accumulate the style loss for each layer
+        
+        # Calculate the total loss as a weighted sum of content and style losses
+        total_loss = CONTENT_WEIGHT * content_loss_value + STYLE_WEIGHT * style_loss_value
+          
+        running[0] += 1
+
+        if running[0] % 50 == 0:
+            print(f"Iteration {running[0]}: Total Loss: {total_loss.item()}") 
+
+        return total_loss  
+    
+    # Perform an optimization step using the closure function
+    optimizer.step(closure)  
 
