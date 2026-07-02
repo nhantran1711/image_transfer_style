@@ -22,6 +22,22 @@ class VGGFeatures(nn.Module):
         # Get the content and style layers
         self.content_layers = '21'
         self.style_layers = ['0', '5', '10', '19', '28']
+    
 
-        
+    def forward(self, x):
+        content = None
+        style = []
 
+        for name, layer in self.vgg._modules.items():
+            temp = layer(x)
+
+            # Reach the content layers, save these features
+            if name == self.content_layers:
+                content = temp
+            
+            # Reach the style layers, save these features
+            if name in self.style_layers:
+                style.append(temp)
+
+
+        return content, style
