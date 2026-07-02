@@ -1,12 +1,17 @@
 
+import os
+
 import torch
 import torch.optim as optim
 from torchvision.utils import save_image
 
 # From 3 files
 from model import VGGFeatures
-from utils import load_image 
+from utils import load_image
 from losses import ContentLoss, StyleLoss
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGES_DIR = os.path.join(BASE_DIR, "..", "images")
 
 
 # VARIABLES
@@ -20,8 +25,8 @@ running = [0]
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the content and style images and move them to the device (CPU or GPU)
-content_image = load_image("images/content.jpg").to(device)
-style_image = load_image("images/style.jpg").to(device)
+content_image = load_image(os.path.join(IMAGES_DIR, "content.jpg")).to(device)
+style_image = load_image(os.path.join(IMAGES_DIR, "style.jpg")).to(device)
 
 # Create an instance of the VGGFeatures model, move it to the device, and set it to evaluation mode
 model = VGGFeatures().to(device).eval()
@@ -59,7 +64,8 @@ while running[0] <= 300:
         
         # Calculate the total loss as a weighted sum of content and style losses
         total_loss = CONTENT_WEIGHT * content_loss_value + STYLE_WEIGHT * style_loss_value
-          
+        total_loss.backward()
+
         running[0] += 1
 
         if running[0] % 50 == 0:
@@ -72,4 +78,4 @@ while running[0] <= 300:
 
 
 # Save the final generated image to a file 
-save_image(generated_image, "images/generated_image.jpg")
+save_image(generated_image, os.path.join(IMAGES_DIR, "generated_image.jpg"))

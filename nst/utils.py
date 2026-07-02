@@ -2,7 +2,7 @@
 
 # Preprocessing functions for neural style transfer.
 
-from tkinter import Image
+from PIL import Image
 import torchvision.transforms as transforms
 
 def load_image(image_path, max_size = 512):

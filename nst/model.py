@@ -28,15 +28,15 @@ class VGGFeatures(nn.Module):
         style = []
 
         for name, layer in self.vgg._modules.items():
-            temp = layer(x)
+            x = layer(x)
 
             # Reach the content layers, save these features
             if name == self.content_layers:
-                content = temp
-            
+                content = x
+
             # Reach the style layers, save these features
             if name in self.style_layers:
-                style.append(temp)
+                style.append(x)
 
 
         return content, style
