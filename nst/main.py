@@ -1,6 +1,7 @@
 
 import torch
 import torch.optim as optim
+from torchvision.utils import save_image
 
 # From 3 files
 from model import VGGFeatures
@@ -69,3 +70,6 @@ while running[0] <= 300:
     # Perform an optimization step using the closure function
     optimizer.step(closure)  
 
+
+# Save the final generated image to a file 
+save_image(generated_image, "images/generated_image.jpg")
