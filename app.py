@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -8,6 +9,7 @@ import streamlit as st
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MAIN_SCRIPT = os.path.join(BASE_DIR, "nst", "main.py")
+ITERATION_RE = re.compile(r"Iteration (\d+):")
 
 # Streamlit app
 st.set_page_config(page_title="Neural Style Transfer Project", layout = "centered")
@@ -55,9 +57,12 @@ if run_clicked:
         with open(style_path, "wb") as f:
             f.write(style_file.getbuffer())
 
+        # Report progress roughly every 5% of steps, regardless of step count
+        print_every = max(1, steps // 20)
+
         # Build the command to run the style transfer script with the specified parameters
         cmd = [
-            sys.executable, MAIN_SCRIPT,
+            sys.executable, "-u", MAIN_SCRIPT,
             "--content", content_path,
             "--style", style_path,
             "--output", output_path,
@@ -66,16 +71,30 @@ if run_clicked:
             "--content-weight", str(content_weight),
             "--lr", str(lr),
             "--max-size", str(max_size),
+            "--print-every", str(print_every),
         ]
 
-        # Run the command and display a spinner while it's running
-        with st.spinner(f"Running style transfer for {steps} steps..."):
-            result = subprocess.run(cmd, cwd = os.path.join(BASE_DIR, "nst"), capture_output = True, text = True)
+        # Run the command, streaming its output to drive a live progress bar
+        progress_bar = st.progress(0, text = f"Running style transfer for {steps} steps...")
+        output_lines = []
+        process = subprocess.Popen(
+            cmd, cwd = os.path.join(BASE_DIR, "nst"),
+            stdout = subprocess.PIPE, stderr = subprocess.STDOUT, text = True, bufsize = 1,
+        )
+        for line in process.stdout:
+            output_lines.append(line)
+            match = ITERATION_RE.search(line)
+            if match:
+                iteration = int(match.group(1))
+                fraction = min(iteration / steps, 1.0)
+                progress_bar.progress(fraction, text = f"Step {iteration}/{steps}")
+        process.wait()
+        progress_bar.empty()
 
         # Check the result of the subprocess and display appropriate messages
-        if result.returncode != 0:
+        if process.returncode != 0:
             st.error("Style transfer failed:")
-            st.code(result.stderr or result.stdout)
+            st.code("".join(output_lines))
         else:
             st.success("Done!")
             st.image(output_path, caption = "Generated image", use_container_width = True)
