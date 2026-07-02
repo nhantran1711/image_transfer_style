@@ -114,7 +114,7 @@ python nst/benchmark.py --max-sizes 256 512 768 --steps 50
 
 Peak memory is read from `torch.cuda.max_memory_allocated` on GPU, or process RSS via `psutil` on CPU.
 
-**Measured on this machine** (CPU only, no CUDA - `torch 2.12.1+cpu`, 30 timed steps + 3 warmup):
+**Measured on AMD Ryzen 5 7500F 6-Core Processor** (CPU only, no CUDA - `torch 2.12.1+cpu`, 30 timed steps + 3 warmup):
 
 | max_size | image dims | ms/step | total (30 steps) | peak memory |
 |---|---|---|---|---|
