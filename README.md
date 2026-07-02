@@ -114,18 +114,18 @@ python nst/benchmark.py --max-sizes 256 512 768 --steps 50
 
 Peak memory is read from `torch.cuda.max_memory_allocated` on GPU, or process RSS via `psutil` on CPU.
 
-**Measured on this machine** (CPU only, no CUDA — `torch 2.12.1+cpu`, 30 timed steps + 3 warmup):
+**Measured on this machine** (CPU only, no CUDA - `torch 2.12.1+cpu`, 30 timed steps + 3 warmup):
 
 | max_size | image dims | ms/step | total (30 steps) | peak memory |
 |---|---|---|---|---|
 | 256 | 255x192 | 240 ms | 7.2 s | 527 MB |
 | 512 | 511x384 | 819 ms | 24.6 s | 1006 MB |
 
-Doubling `--max-size` roughly quadruples pixel count, and cost scales accordingly — ms/step went up ~3.4x and peak memory ~1.9x from 256→512. On a CUDA GPU, expect this to be an order of magnitude faster; re-run the command above on your own hardware to get numbers specific to your setup.
+Doubling `--max-size` roughly quadruples pixel count, and cost scales accordingly - ms/step went up ~3.4x and peak memory ~1.9x from 256→512. On a CUDA GPU, expect this to be an order of magnitude faster; re-run the command above on your own hardware to get numbers specific to your setup.
 
 ## Tuning tips
 
 - **More style, less structure**: increase `--style-weight` (or decrease `--content-weight`).
 - **Blurry or noisy result**: lower `--lr`, or increase `--steps` so the optimizer has more time to converge.
-- **Slow / out of memory**: reduce `--max-size` — cost scales roughly quadratically with image dimension.
+- **Slow / out of memory**: reduce `--max-size` - cost scales roughly quadratically with image dimension.
 - Content and style images don't need matching dimensions or aspect ratios; both are independently resized so their longest edge is `--max-size`.
