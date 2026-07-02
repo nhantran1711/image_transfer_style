@@ -95,6 +95,34 @@ python nst/main.py --content path/to/content.jpg --style path/to/style.jpg --out
 | `--max-size` | `512` | Longest edge (px) images are resized to before optimization |
 | `--print-every` | `50` | Print the loss every N steps |
 
+## Benchmarking
+
+[nst/benchmark.py](nst/benchmark.py) times the optimization loop (reusing the same model/loss code as `main.py`) across one or more image sizes, reporting ms/step and peak memory. A few warmup steps are run untimed first to absorb one-off costs like cuDNN autotuning.
+
+```bash
+python nst/benchmark.py --max-sizes 256 512 768 --steps 50
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--content` / `--style` | `images/content.jpg` / `images/style.jpg` | Images to benchmark with |
+| `--steps` | `50` | Timed optimization steps |
+| `--warmup-steps` | `5` | Untimed steps run before timing starts |
+| `--max-sizes` | `256 512` | One or more image sizes to benchmark, e.g. `--max-sizes 256 512 768` |
+| `--device` | auto | Force `cpu` or `cuda` |
+| `--output` | none | Optional path to dump results as JSON |
+
+Peak memory is read from `torch.cuda.max_memory_allocated` on GPU, or process RSS via `psutil` on CPU.
+
+**Measured on this machine** (CPU only, no CUDA — `torch 2.12.1+cpu`, 30 timed steps + 3 warmup):
+
+| max_size | image dims | ms/step | total (30 steps) | peak memory |
+|---|---|---|---|---|
+| 256 | 255x192 | 240 ms | 7.2 s | 527 MB |
+| 512 | 511x384 | 819 ms | 24.6 s | 1006 MB |
+
+Doubling `--max-size` roughly quadruples pixel count, and cost scales accordingly — ms/step went up ~3.4x and peak memory ~1.9x from 256→512. On a CUDA GPU, expect this to be an order of magnitude faster; re-run the command above on your own hardware to get numbers specific to your setup.
+
 ## Tuning tips
 
 - **More style, less structure**: increase `--style-weight` (or decrease `--content-weight`).
