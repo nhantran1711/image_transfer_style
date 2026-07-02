@@ -8,7 +8,7 @@ A PyTorch implementation of neural style transfer (Gatys et al., 2015): given a 
 
 ## How it works
 
-A pretrained VGG19 convolutional network is used purely as a fixed feature extractor (no training, no gradient updates to its weights). The pixels of the *generated image* itself are the only learnable parameters — we optimize them directly so that the image's VGG features simultaneously match the content image's features and the style image's texture statistics.
+A pretrained VGG19 convolutional network is used purely as a fixed feature extractor (no training, no gradient updates to its weights). The pixels of the *generated image* itself are the only learnable parameters. We optimize them directly so that the image's VGG features simultaneously match the content image's features and the style image's texture statistics.
 
 ### 1. Feature extraction
 
@@ -31,7 +31,7 @@ Style is captured by *correlations between feature channels*, not their spatial 
 
 $$G = \frac{F F^\top}{C \cdot H \cdot W}$$
 
-$G_{jk}$ measures how often channel $j$ and channel $k$ activate together, anywhere in the image — a texture "fingerprint" that's independent of where objects sit. The style loss at one layer is the MSE between the generated image's Gram matrix $G$ and the style image's Gram matrix $A$:
+$G_{jk}$ measures how often channel $j$ and channel $k$ activate together, anywhere in the image - a texture "fingerprint" that's independent of where objects sit. The style loss at one layer is the MSE between the generated image's Gram matrix $G$ and the style image's Gram matrix $A$:
 
 $$\mathcal{L}_{style}^{layer} = \frac{1}{n}\sum_{j,k} (G_{jk} - A_{jk})^2$$
 
@@ -49,11 +49,11 @@ The generated image is initialized as a clone of the content image, then its pix
 
 ```
 nst/
-  main.py     CLI entry point — parses args, runs the optimization loop, saves the result
-  model.py    VGGFeatures — frozen VGG19 feature extractor
+  main.py     CLI entry point: parses args, runs the optimization loop, saves the result
+  model.py    VGGFeatures: frozen VGG19 feature extractor
   losses.py   ContentLoss, StyleLoss, gram_matrix
-  utils.py    load_image — loads, resizes, and tensorizes an image
-app.py        Streamlit UI — upload images, tune hyperparameters, watch progress, download result
+  utils.py    load_image: loads, resizes, and tensorizes an image
+app.py        Streamlit UI: upload images, tune hyperparameters, watch progress, download result
 images/       Example content/style images and default output location
 ```
 
