@@ -67,6 +67,56 @@ pip install -r requirements.txt
 
 A CUDA-capable GPU is used automatically if available (`torch.cuda.is_available()`); otherwise it falls back to CPU, which is significantly slower.
 
+## Running with Docker
+
+### Build the image
+
+```bash
+docker build -t nst-app .
+```
+
+First build takes ~2-3 minutes (downloading PyTorch and dependencies). Subsequent builds are near-instant unless `requirements.txt` changes.
+
+### Run the web UI
+
+```bash
+docker run -p 8501:8501 nst-app
+```
+
+Open `http://localhost:8501` in your browser.
+
+### Persist the VGG19 weights (recommended)
+
+`torchvision` downloads pretrained VGG19 weights (~550MB) on first use. Mount a volume so they're cached across container restarts instead of re-downloading every time:
+
+```bash
+docker run -p 8501:8501 -v nst-torch-cache:/root/.cache/torch nst-app
+```
+
+### Mount local images
+
+To feed content/style images from your host machine and get results back without rebuilding:
+
+```bash
+docker run -p 8501:8501 \
+  -v nst-torch-cache:/root/.cache/torch \
+  -v $(pwd)/images:/app/images \
+  nst-app
+```
+
+### Run the CLI instead of the web UI
+
+```bash
+docker run \
+  -v nst-torch-cache:/root/.cache/torch \
+  -v $(pwd)/images:/app/images \
+  nst-app \
+  python nst/main.py --content images/content.jpg --style images/style.jpg --output images/generated_image.jpg
+```
+
+> **Note:** This image runs on CPU only. Style transfer is compute-heavy — see the [Benchmarking](#benchmarking) section above for expected timings. GPU support is not currently containerized.
+
+
 ## Usage
 
 ### Web UI
@@ -99,9 +149,6 @@ python nst/main.py --content path/to/content.jpg --style path/to/style.jpg --out
 
 [nst/benchmark.py](nst/benchmark.py) times the optimization loop (reusing the same model/loss code as `main.py`) across one or more image sizes, reporting ms/step and peak memory. A few warmup steps are run untimed first to absorb one-off costs like cuDNN autotuning.
 
-```bash
-python nst/benchmark.py --max-sizes 256 512 768 --steps 50
-```
 
 | Flag | Default | Meaning |
 |---|---|---|
