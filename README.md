@@ -104,6 +104,37 @@ docker run -p 8501:8501 \
   nst-app
 ```
 
+## Deploying to AWS (EC2)
+
+1. Launch an EC2 instance (Amazon Linux 2023, `t3.micro` or larger — style transfer is CPU-bound). Open inbound ports `22` and `8501` in the security group.
+
+2. SSH in and install Docker:
+```bash
+  sudo yum update -y
+  sudo yum install -y docker git
+  sudo service docker start
+  sudo usermod -a -G docker ec2-user
+```
+
+3. Clone the repo and build:
+```bash
+  git clone https://github.com/nhantran1711/image_transfer_style.git
+  cd image_transfer_style
+  docker build -t nst-app .
+```
+
+4. Run it detached, so it survives SSH disconnects:
+```bash
+  docker run -d -p 8501:8501 \
+    -v nst-torch-cache:/root/.cache/torch \
+    --restart unless-stopped \
+    nst-app
+```
+
+5. Visit `http://<instance-public-ip>:8501`.
+
+> **Cost note:** Run the instance on-demand rather than 24/7 — stop it via the EC2 console when you're done, to stay within free-tier limits. The public IP changes on each stop/start unless you attach an Elastic IP.
+
 ### Run the CLI instead of the web UI
 
 ```bash
@@ -144,6 +175,14 @@ python nst/main.py --content path/to/content.jpg --style path/to/style.jpg --out
 | `--lr` | `0.01` | Adam learning rate |
 | `--max-size` | `512` | Longest edge (px) images are resized to before optimization |
 | `--print-every` | `50` | Print the loss every N steps |
+
+
+## Demo
+
+![Streamlit UI showing content, style, and generated images](screenshots/aws_project_screenshot.png)
+
+*Running on AWS EC2 — upload a content and style image, tune parameters in the sidebar, and generate the result.*
+
 
 ## Benchmarking
 
