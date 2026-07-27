@@ -133,8 +133,6 @@ docker run -p 8501:8501 \
 
 5. Visit `http://<instance-public-ip>:8501`.
 
-> **Cost note:** Run the instance on-demand rather than 24/7 — stop it via the EC2 console when you're done, to stay within free-tier limits. The public IP changes on each stop/start unless you attach an Elastic IP.
-
 ### Run the CLI instead of the web UI
 
 ```bash
