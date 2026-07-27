@@ -179,7 +179,7 @@ python nst/main.py --content path/to/content.jpg --style path/to/style.jpg --out
 
 ![Streamlit UI showing content, style, and generated images](screenshots/aws_project_screenshot.png)
 
-*Running on AWS EC2 — upload a content and style image, tune parameters in the sidebar, and generate the result.*
+*Running on AWS EC2, upload a content and style image, tune parameters in the sidebar, and generate the result.*
 
 
 ## Benchmarking
